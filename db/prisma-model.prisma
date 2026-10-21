@@ -1,0 +1,30 @@
+// Referência para quando a lista migrar para o backend NestJS/Prisma do PitDrive.
+// Mapeia exatamente as tabelas de db/schema.sql (mesmos nomes de colunas),
+// então dá para apontar o Prisma para o mesmo banco ou importar os dados sem conversão.
+// Não é usado por este projeto.
+
+model WaitlistLead {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String
+  email            String         @unique(map: "waitlist_leads_email_key")
+  car              String?
+  utmSource        String?        @map("utm_source")
+  utmMedium        String?        @map("utm_medium")
+  utmCampaign      String?        @map("utm_campaign")
+  utmContent       String?        @map("utm_content")
+  utmTerm          String?        @map("utm_term")
+  landingPath      String?        @map("landing_path")
+  referrerHost     String?        @map("referrer_host")
+  consentGiven     Boolean        @map("consent_given")
+  consentVersion   String         @map("consent_version")
+  consentAt        DateTime       @default(now()) @map("consent_at") @db.Timestamptz
+  status           String         @default("WAITLISTED") // WAITLISTED | UNSUBSCRIBED (CHECK no SQL)
+  unsubscribedAt   DateTime?      @map("unsubscribed_at") @db.Timestamptz
+  unsubscribeToken String         @unique(map: "waitlist_leads_unsubscribe_token_key") @default(dbgenerated("gen_random_uuid()")) @map("unsubscribe_token") @db.Uuid
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([createdAt], map: "waitlist_leads_created_at_idx")
+  @@index([utmSource], map: "waitlist_leads_utm_source_idx")
+  @@map("waitlist_leads")
+}
